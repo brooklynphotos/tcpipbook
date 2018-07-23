@@ -13,14 +13,6 @@ public class BruteForceCoding {
 
     private static final int BYTEMASK = 0xFF; // 8 bit
 
-    public static final String byteArrayToDecimalString(byte[] bArray){
-        final StringBuilder rtn = new StringBuilder();
-        for (byte b : bArray) {
-            rtn.append(b & BYTEMASK).append(" ");
-        }
-        return rtn.toString();
-    }
-
     public static final int encodeIntBigEndian(byte[] dst, long val, int offset, int size) {
         for (int i = 0; i < size; i++) {
             dst[offset++] = (byte) (val >> ((size - i - 1) * Byte.SIZE));
@@ -44,7 +36,7 @@ public class BruteForceCoding {
         offset = encodeIntBigEndian(message, shortVal, offset, SSIZE);
         offset = encodeIntBigEndian(message, intVal, offset, ISIZE);
         offset = encodeIntBigEndian(message, longVal, offset, LSIZE);
-        System.out.printf("Ended encoding (offset=%d): %s%n", offset, byteArrayToDecimalString(message));
+        System.out.printf("Ended encoding (offset=%d): %s%n", offset, ByteUtils.byteArrayToDecimalString(message));
 
         // decode several fields
         long value = decodeIntBigEndian(message, BSIZE, SSIZE);
