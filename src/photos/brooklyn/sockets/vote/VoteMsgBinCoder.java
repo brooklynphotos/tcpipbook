@@ -1,8 +1,6 @@
 package photos.brooklyn.sockets.vote;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 
 /**
  * The message comprises two shorts and a long;
@@ -22,6 +20,7 @@ public class VoteMsgBinCoder implements VoteMsgCoder {
     @Override
     public byte[] toWire(final VoteMsg msg) throws IOException {
         short magicAndFlags = MAGIC;
+        // flipping 1 and 0 on the bits
         if (msg.isInquiry()) {
             magicAndFlags |= INQUIRE_FLAG;
         }
@@ -46,6 +45,35 @@ public class VoteMsgBinCoder implements VoteMsgCoder {
 
     @Override
     public VoteMsg fromWire(final byte[] input) throws IOException {
-        return null;
+        // sanity check
+        if (input.length < MIN_WIRE_LENGTH) {
+            throw new IOException("Run message");
+        }
+        try (
+                final ByteArrayInputStream bs = new ByteArrayInputStream(input);
+                final DataInputStream in = new DataInputStream(bs)
+        ) {
+            final int magic = in.readShort();
+            if ((magic & MAGIC_MASK) != MAGIC) {
+                throw new IOException("Bad magic #:" + ((magic & MAGIC_MASK) >> MAGIC_SHIFT));
+            }
+            // reading single bits for boolean
+            final boolean resp = ((magic & RESPONSE_FLAG) != 0);
+            final boolean inq = ((magic & INQUIRE_FLAG) != 0);
+            final int candidateId = in.readShort();
+            if (candidateId < 0 || candidateId > 1000) {
+                throw new IOException("Bad candidate id: " + candidateId);
+            }
+            long count = 0;
+            if (resp) {
+                count = in.readLong();
+                if (count < 0) {
+                    throw new IOException("Bad vote count: " + count);
+                }
+            }
+            // Ignore any extra bytes
+            return new VoteMsg(inq, resp, candidateId, count);
+        }
+
     }
 }
