@@ -2,8 +2,17 @@ package photos.brooklyn.sockets.vote;
 
 public class VoteMsg {
     private boolean isInquiry;
+
+    public void setResponse(final boolean response) {
+        isResponse = response;
+    }
+
     private boolean isResponse;
     private int candidateId;
+
+    public void setInquiry(final boolean inquiry) {
+        isInquiry = inquiry;
+    }
 
     private long voteCount;
 
@@ -48,5 +57,9 @@ public class VoteMsg {
             res = "response to " + res + " who now has " + voteCount + " vote(s)";
         }
         return res;
+    }
+
+    public void setVoteCount(final long voteCount) {
+        this.voteCount = voteCount;
     }
 }
